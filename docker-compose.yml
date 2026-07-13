@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n_captain
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_SECURE_COOKIE=false
+      - TZ=Asia/Bangkok
+      - N8N_BLOCK_FS_WRITE_ACCESS=false
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+      - N8N_NODES_INCLUDE=*
+      - N8N_BLOCK_SVC_COMMAND_NODES=false
+      - NODES_EXCLUDE=[]
+      - N8N_NODES_EXCLUDE=[]
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+      - /home/captain/n8n-docker/odoo_storage:/home/node/.n8n-files/odoo_storage

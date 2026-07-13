@@ -1,0 +1,11 @@
+# Exclude actual database and data storage for security and size
+n8n_data/
+odoo_storage/
+
+# Exclude backup archives
+*.tar.gz
+*.zip
+*.tgz
+
+# OS specific files
+.DS_Store
