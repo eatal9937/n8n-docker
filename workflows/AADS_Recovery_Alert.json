@@ -1,0 +1,62 @@
+{
+  "id": "58vVo36uOJNVaLlT",
+  "name": "AADS Recovery Alert",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aads-recovery-alert",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "aads-recovery-alert-id",
+      "id": "45579746-b888-4c51-9fd8-0919af1c6e82"
+    },
+    {
+      "parameters": {
+        "chatId": "8948351323",
+        "text": "={{ $json.body.message }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "qzMwsuCr7woIGqjM",
+          "name": "Telegram Bot (phongthep_alert_bot)"
+        }
+      },
+      "id": "dec1dcc8-1cd2-46f3-9489-98fbf6cd356a",
+      "webhookId": "45dd1fcb-4f8e-4661-bb05-d5c2b4893ccf"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

@@ -1,0 +1,705 @@
+{
+  "id": "SZzIphpNILR0ap6N",
+  "name": "LINE_Captain_Copilot_Engine",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "line-bot",
+        "options": {}
+      },
+      "id": "line-webhook-01",
+      "name": "LINE Webhook",
+      "webhookId": "line-bot-webhook-2026",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || {};\nconst events = body.events || [];\n\nconst output = [];\n\nfor (const event of events) {\n    if (event.type === 'message' && event.message?.type === 'text') {\n        let text = event.message.text.trim();\n        // Clean out bot name mentions\n        text = text.replace(/@?Captain\\s*Copilot/gi, '')\n                   .replace(/@?Captain/gi, '')\n                   .replace(/@?Copilot/gi, '')\n                   .replace(/@\\S+/g, '')\n                   .replace(/บอท/g, '')\n                   .trim();\n\n        const lower = text.toLowerCase();\n        const replyToken = event.replyToken;\n        const source = event.source || {};\n        const isGroup = source.type === 'group' || source.type === 'room';\n        const groupId = source.groupId || source.roomId || null;\n        const userId = source.userId || null;\n\n        let action = 'ignore';\n        let query = text;\n\n        // Help command keywords\n        const isHelpCommand = (\n            text === 'ช่วยเหลือ' ||\n            text === 'วิธีใช้' ||\n            text === 'คำสั่ง' ||\n            text === 'คู่มือ' ||\n            text === 'เมนู' ||\n            lower === 'help' ||\n            lower === 'menu' ||\n            lower === 'commands' ||\n            text.includes('ช่วยเหลือ') ||\n            text.includes('วิธีใช้บอท') ||\n            text.includes('วิธีใช้งาน') ||\n            text.includes('คำสั่งบอท')\n        );\n\n        // Daily Standup / Morning Briefing keywords\n        const isStandup = (\n            text === 'สรุปเช้า' ||\n            text === 'standup' ||\n            lower === 'standup' ||\n            text === 'สรุปงานเช้า' ||\n            text === 'บรีฟเช้า' ||\n            text === 'รายงานเช้า' ||\n            text.includes('สรุปเช้า') ||\n            text.includes('สรุปงานเช้า') ||\n            text.includes('บรีฟงาน')\n        );\n\n        // Customer Site / Sold To lookup keywords\n        const soldToMatch = (\n            text.match(/^(?:sold\\s*to|soldto|เลขไซต์|รหัสลูกค้า|ข้อมูลไซต์|ขอข้อมูลไซต์|ไซต์|ค้นหา\\s*sold|info\\s*site|info)\\s*(.*)$/i) ||\n            text.match(/(.*?)\\s*(?:ข้อมูลไซต์|ขอข้อมูลไซต์)$/i)\n        );\n        \n        // Case status / count / search detection\n        const statusMatch = (\n            text.match(/^(?:สถานะ|status|เช็คเคส|ตามเคส|เคส|มีกี่เคส|เช็คสถานะ)\\s*(.*)$/i) ||\n            text.match(/(.*?)(?:มีกี่เคส|มีเคสอะไรบ้าง|มีเคสกี่เคส|เคสมีอะไรบ้าง|กี่เคส)/i) ||\n            text.match(/\\b(1-\\d{10,12})\\b/) ||\n            text.match(/\\b(TKT-\\d{5})\\b/i) ||\n            (text.includes('เคส') && (text.includes('ธนชาต') || text.includes('ไทยประกัน') || text.includes('กฟน') || text.includes('ทอ') || text.includes('cimb') || text.includes('mea')))\n        );\n        \n        // Technical problem / Incident detection keywords\n        const isProblemKeywords = (\n            text.includes('เปิดเคส') || lower.includes('open case') || text.includes('สร้างเคส') || text.includes('แจ้งเคส') || text.includes('เคสใหม่') ||\n            text.includes('โทรไม่ได้') || text.includes('โทรออกไม่ได้') || text.includes('รับสายไม่ได้') || text.includes('สายตัด') ||\n            lower.includes('reorder') || lower.includes('forbidden') || lower.includes('403') || lower.includes('503') || lower.includes('500') ||\n            lower.includes('cm 8') || lower.includes('cm 7') || lower.includes('cm 6') || lower.includes('list trace') || lower.includes('sip trunk') ||\n            text.includes('ลูกค้า') && (text.includes('ตู้') || text.includes('cm') || text.includes('โทร') || text.includes('อาการ') || text.includes('ปัญหา'))\n        );\n\n        const isGeneralAIChat = (\n            !isGroup || event.message.text.includes('@Captain') || event.message.text.includes('@บอท') || lower.includes('avaya') || lower.includes('copilot')\n        );\n\n        if (isHelpCommand) {\n            action = 'help';\n            query = text;\n        } else if (isStandup) {\n            action = 'check_status';\n            query = '__STANDUP__';\n        } else if (soldToMatch && (soldToMatch[1] || soldToMatch[0])) {\n            action = 'lookup_sold_to';\n            query = (soldToMatch[1] || soldToMatch[0]).trim();\n        } else if (statusMatch) {\n            action = 'check_status';\n            if (statusMatch[1] && statusMatch[1].trim()) {\n                query = statusMatch[1].trim().replace(/(?:มีกี่เคส|มีเคสอะไรบ้าง|มีเคสกี่เคส|กี่เคส)/g, '').trim();\n            } else if (statusMatch[0]) {\n                query = statusMatch[0].trim().replace(/(?:มีกี่เคส|มีเคสอะไรบ้าง|มีเคสกี่เคส|กี่เคส)/g, '').trim();\n            }\n            if (!query) query = text.replace(/(?:มีกี่เคส|มีเคสอะไรบ้าง|กี่เคส|เคส)/g, '').trim();\n        } else if (isProblemKeywords) {\n            action = 'open_case';\n            query = text.replace(/^(?:เปิดเคส|open case|สร้างเคส|แจ้งเคส|เคสใหม่)[:\\s]*/i, '').trim() || text;\n        } else if (isGeneralAIChat) {\n            action = 'ai_chat';\n            query = text;\n        }\n\n        output.push({\n            json: {\n                action: action,\n                query: query,\n                rawText: text,\n                replyToken: replyToken,\n                groupId: groupId,\n                userId: userId,\n                isGroup: isGroup\n            }\n        });\n    }\n}\n\nreturn output;"
+      },
+      "id": "filter-parser-01",
+      "name": "Parse & Route Events",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "lookup_sold_to",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sold To Lookup"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "check_status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Status Check"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "open_case",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Open Case"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "ai_chat",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AI Chat"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Help Guide"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "router-switch-01",
+      "name": "Route Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        544,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://phongthep.lol/helpdesk/api/search_tickets?query={{ $json.query === '__STANDUP__' ? '' : encodeURIComponent($json.query) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "odoo-check-node",
+      "name": "Query Odoo Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const meta = $('Parse & Route Events').item.json;\nconst res = $input.item.json;\nconst tickets = res.data || res.tickets || [];\n\nconst stateMap = {\n    'new': '🔵 ใหม่ (New)',\n    'in_progress': '🟡 กำลังทำ (In Progress)',\n    'pending': '⏳ รอข้อมูล (Pending)',\n    'solved': '🟢 แก้ไขแล้ว (Solved)',\n    'closed': '⚪ ปิดเคสแล้ว (Closed)'\n};\n\nlet replyText = \"\";\n\nif (meta.query === '__STANDUP__') {\n    const inProgress = tickets.filter(x => x.state === 'in_progress').length;\n    const closed = tickets.filter(x => x.state === 'closed' || x.state === 'solved').length;\n    const newCount = tickets.filter(x => x.state === 'new').length;\n\n    const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];\n    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];\n    const now = new Date(Date.now() + 7 * 3600 * 1000);\n    const dayName = days[now.getUTCDay()];\n    const dateStr = `วัน${dayName}ที่ ${now.getUTCDate()} ${months[now.getUTCMonth()]} ${now.getUTCFullYear() + 543}`;\n\n    replyText = `☀️ [อรุณสวัสดิ์ทีมงาน! สรุปภารกิจประจำวัน]\\n` +\n                `📅 ${dateStr}\\n` +\n                `━━━━━━━━━━━━━━━━━━━━\\n` +\n                `📊 สถานะภาพรวม: 🟡 กำลังทำ: ${inProgress} | 🔵 ใหม่: ${newCount} | 🟢 ปิดแล้ว: ${closed}\\n` +\n                `━━━━━━━━━━━━━━━━━━━━\\n` +\n                `📋 เคสที่ต้องดูแลแยกตามวิศวกร:\\n\\n`;\n\n    const activeTickets = tickets.filter(x => x.state !== 'closed' && x.state !== 'solved' && x.state !== 'cancel');\n    const grouped = {};\n    for (const t of activeTickets) {\n        const eng = t.site_engineer || 'Phongthep Phimthong';\n        if (!grouped[eng]) grouped[eng] = [];\n        grouped[eng].push(t);\n    }\n\n    if (Object.keys(grouped).length === 0) {\n        replyText += `🎉 ยอดเยี่ยมมาก! ขณะนี้ไม่มีเคสค้างในระบบครับ\\n`;\n    } else {\n        for (const [eng, caseList] of Object.entries(grouped)) {\n            replyText += `👤 @${eng} (${caseList.length} เคส):\\n`;\n            for (let i = 0; i < Math.min(caseList.length, 3); i++) {\n                const c = caseList[i];\n                const stateEmoji = c.state === 'in_progress' ? '🟡' : (c.state === 'new' ? '🔵' : '⏳');\n                replyText += `  • 🎫 ${c.ref} - ${c.customer || 'Not specified'}\\n` +\n                             `    ${stateEmoji} ${c.state} | Avaya: ${c.sr_number || '-'}\\n` +\n                             `    🌐 ${c.portal_url}\\n`;\n            }\n            if (caseList.length > 3) {\n                replyText += `    ...และอีก ${caseList.length - 3} เคส\\n`;\n            }\n            replyText += `\\n`;\n        }\n    }\n\n    replyText += `━━━━━━━━━━━━━━━━━━━━\\n` +\n                 `💡 ขอให้ทุกท่านปฏิบัติงานด้วยความปลอดภัยครับ!\\n` +\n                 `(พิมพ์ 'สรุปเช้า' เพื่อเรียกดูข้อมูลอัปเดตได้ตลอดเวลา)`;\n\n    return {\n        json: {\n            replyToken: meta.replyToken,\n            text: replyText.trim()\n        }\n    };\n}\n\nif (tickets.length === 1) {\n    const t = tickets[0];\n    const stateTh = stateMap[t.state] || t.state;\n    replyText = `📌 [รายงานสถานะเคส Odoo]\\n` +\n                `━━━━━━━━━━━━━━━━━━━━\\n` +\n                `🎫 เลขเคส: ${t.ref || '-'}\\n` +\n                `🏢 ลูกค้า: ${t.customer || '-'}\\n` +\n                `👤 ผู้ดูแลไซต์: @${t.site_engineer || 'Phongthep Phimthong'}\\n` +\n                `🔢 Avaya SR#: ${t.sr_number || '-'}\\n` +\n                `📊 สถานะ: ${stateTh}\\n` +\n                `📋 หัวข้อ: ${t.subject || '-'}\\n\\n` +\n                `🌐 ดูรายละเอียดเคส (ไม่ต้องล็อกอิน):\\n${t.portal_url || ('https://phongthep.lol/helpdesk/ticket/' + t.id)}`;\n} else if (tickets.length > 1) {\n    const inProgress = tickets.filter(x => x.state === 'in_progress').length;\n    const closed = tickets.filter(x => x.state === 'closed' || x.state === 'solved').length;\n    const newCount = tickets.filter(x => x.state === 'new').length;\n\n    replyText = `📌 [รายงานสรุปเคสในระบบ Odoo]\\n` +\n                `🔍 คำค้นหา: \"${meta.query}\" (พบทั้งหมด ${tickets.length} เคส)\\n` +\n                `📊 สรุป: 🟡 กำลังทำ: ${inProgress} | 🟢 ปิดแล้ว: ${closed}${newCount ? (' | 🔵 ใหม่: ' + newCount) : ''}\\n` +\n                `━━━━━━━━━━━━━━━━━━━━\\n`;\n\n    for (let i = 0; i < Math.min(tickets.length, 5); i++) {\n        const t = tickets[i];\n        const stateTh = stateMap[t.state] || t.state;\n        replyText += `${i+1}. 🎫 ${t.ref} | 📊 ${stateTh}\\n` +\n                     `   👤 ผู้ดูแล: @${t.site_engineer || 'Phongthep Phimthong'}\\n` +\n                     `   🔢 Avaya SR: ${t.sr_number || '-'}\\n` +\n                     `   📋 ${t.subject.substring(0, 70)}...\\n` +\n                     `   🌐 ดูตั๋ว: ${t.portal_url}\\n` +\n                     `────────────────────\\n`;\n    }\n} else {\n    replyText = `🔍 ไม่พบข้อมูลเคสสำหรับ: \"${meta.query}\" ในระบบ Odoo\\nกรุณาตรวจสอบชื่อลูกค้า (เช่น ธนชาต, ไทยประกัน, กฟน) หรือเลข Avaya SR อีกครั้งครับ`;\n}\n\nreturn {\n    json: {\n        replyToken: meta.replyToken,\n        text: replyText.trim()\n    }\n};"
+      },
+      "id": "format-status-response",
+      "name": "Format Status Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  JSON.stringify({\n    model: \"openai/gpt-oss-120b\",\n    messages: [\n      {\n        role: \"system\",\n        content: \"คุณคือ Captain Copilot ผู้ช่วยวิศวกร Avaya Telephony & Telecom ประจำทีม JADS Comm\\nผู้ใช้ต้องการให้คุณช่วยสรุปและร่างเทมเพลตสำหรับเปิดเคสกับ Avaya TAC Support อย่างมืออาชีพ\\n\\nรายชื่อสมาชิกในทีมวิศวกร (ระบุผู้รับผิดชอบ):\\n- Beer PRIORITY (เบียร์)\\n- Chalerm (เฉลิม)\\n- Jackie Chan Nakama (แจ็คกี้)\\n- kai_amnat (ไก่/อำนาจ)\\n- Nueng (หนึ่ง)\\n- Romance (โรม)\\n- Surawat🐸6915 (สุรวัฒน์/กบ)\\n- tohtoro Qool @60 (ต่อ)\\n- Toh Phakdee (โต้ง)\\n- Ton (ต้น)\\n- Phongthep Phimthong (Captain - ค่าเริ่มต้นถ้าไม่ได้ระบุใคร)\\n\\nให้สรุปออกมา 2 ส่วน:\\n1. 📋 ข้อมูลเปิดเคส (ภาษาไทย สำหรับทีม):\\n• ผู้รับผิดชอบไซต์/เคส: [แท็ก @ชื่อไลน์ ตามรายชื่อด้านบน หากไม่ได้ระบุให้เป็น @Captain (Phongthep)]\\n• สรุปอาการ, อุปกรณ์ที่พบปัญหา, ผลกระทบ\\n• สิ่งที่ทีมต้องเตรียม (เช่น MST trace, sniffer/pcap, logs)\\n\\n2. 📄 Official Avaya SR Template (ภาษาอังกฤษมาตรฐาน Avaya สำหรับส่งเปิดเคส):\\n- Subject:\\n- Product & Release (e.g. CM 8.1.3, Session Manager):\\n- Problem Description:\\n- Business Impact / Urgency (Severity 1-4):\\n- Troubleshooting Performed:\\n- Collected Logs/Traces attached:\\n\\nตอบกระชับ ตรงประเด็น ชัดเจน\"\n      },\n      {\n        role: \"user\",\n        content: $json.query\n      }\n    ],\n    temperature: 0.3,\n    max_tokens: 1500\n  })\n}}",
+        "options": {
+          "timeout": 25000
+        }
+      },
+      "id": "groq-open-case-node",
+      "name": "Groq AI: Draft Avaya SR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst aiResp = $input.item.json;\nconst meta = $('Parse & Route Events').item.json;\nconst answer = aiResp.choices?.[0]?.message?.content || \"ขออภัยครับ ไม่สามารถสร้างเทมเพลตได้ในขณะนี้\";\n\nreturn {\n    json: {\n        replyToken: meta.replyToken,\n        text: `🤖 [Captain Copilot - สรุปเทมเพลตเปิดเคส Avaya]\n━━━━━━━━━━━━━━━━━━━━\n${answer}`\n    }\n};\n"
+      },
+      "id": "format-open-case",
+      "name": "Format Case Template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  JSON.stringify({\n    model: \"openai/gpt-oss-120b\",\n    messages: [\n      {\n        role: \"system\",\n        content: \"คุณคือ Captain Copilot ที่ปรึกษาวิศวกรโทรคมนาคม (Avaya, SIP, VoIP, Network, Odoo Helpdesk) ผู้เชี่ยวชาญระดับ Senior ของทีม\\n- ตอบคำถามอย่างสุภาพ ฉลาด ตรงประเด็น อธิบายขั้นตอนแก้ปัญหาหรือวิเคราะห์ Root Cause ได้ชัดเจน\\n- ใช้ภาษาไทยเป็นหลัก ยกเว้น technical term หรือคำสั่ง CLI\\n- หากเกี่ยวข้องกับการติดต่อ Avaya Support แนะนำ technical logs ที่ควรเก็บประกอบเสมอ\"\n      },\n      {\n        role: \"user\",\n        content: $json.query\n      }\n    ],\n    temperature: 0.4,\n    max_tokens: 1200\n  })\n}}",
+        "options": {
+          "timeout": 25000
+        }
+      },
+      "id": "groq-ai-chat-node",
+      "name": "Groq AI: Assistant Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst aiResp = $input.item.json;\nconst meta = $('Parse & Route Events').item.json;\nconst answer = aiResp.choices?.[0]?.message?.content || \"ขออภัยครับ ไม่สามารถประมวลผลข้อความได้\";\n\nreturn {\n    json: {\n        replyToken: meta.replyToken,\n        text: `🤖 [Captain Copilot]:\n${answer}`\n    }\n};\n"
+      },
+      "id": "format-ai-chat",
+      "name": "Format AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer WNdOFqC4kto2088XfYnjyUtdFCsclKz3WO2mU0X4LlS0Z8ue0rULhH01s+HVk403o0Zxqjo64kdgRmz9CXw+6KV7gR2j4eFq37dVqdXzPdilT5SBB214alUlV3fOXacQul6h/Ml7egbQBtuhdf5fvAdB04t89/1O/w1cDnyilFU="
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  JSON.stringify({\n    replyToken: $json.replyToken,\n    messages: [\n      {\n        type: \"text\",\n        text: $json.text,\n        ...($json.mention ? { mention: $json.mention } : {})\n      }\n    ]\n  })\n}}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "line-reply-node",
+      "name": "Send LINE Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        192
+      ],
+      "continueOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://phongthep.lol/helpdesk/api/lookup_sold_to?query={{ encodeURIComponent($json.query) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "lookup-sold-to-node",
+      "name": "Lookup Sold To API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const res = $input.item.json;\nconst meta = $('Parse & Route Events').item.json;\n\nlet replyText = \"\";\nif (res.success && res.data && res.data.length > 0) {\n    replyText = `🏢 [ข้อมูลไซต์ & ข้อมูลลูกค้า Sold To]\\n` +\n                `คำค้นหา: \"${meta.query}\" (พบ ${res.data.length} ไซต์)\\n` +\n                `━━━━━━━━━━━━━━━━━━━━\\n`;\n    \n    for (let i = 0; i < Math.min(res.data.length, 3); i++) {\n        const d = res.data[i];\n        replyText += `🏢 ลูกค้า: ${d.customer_name}\\n` +\n                     `🔢 Sold To #: ${d.sold_to || '-'}\\n` +\n                     (d.phone ? `📞 เบอร์ติดต่อ: ${d.phone}\\n` : '') +\n                     (d.email ? `📧 อีเมล: ${d.email}\\n` : '') +\n                     `📍 ที่อยู่: ${d.address || '-'}\\n`;\n\n        if (d.active_tickets && d.active_tickets.length > 0) {\n            replyText += `📋 เคสที่กำลังดำเนินการ (${d.active_tickets.length} เคส):\\n`;\n            for (const t of d.active_tickets) {\n                replyText += `  • 🎫 ${t.ref} | SR#: ${t.sr_number || '-'}\\n` +\n                             `    👨‍💻 ผู้ดูแล: @${t.site_engineer || 'Phongthep Phimthong'}\\n` +\n                             `    🌐 ${t.portal_url}\\n`;\n            }\n        } else {\n            replyText += `✅ ไม่มีเคสค้างในขณะนี้\\n`;\n        }\n        replyText += `────────────────────\\n`;\n    }\n} else {\n    replyText = `🔍 ไม่พบข้อมูลไซต์สำหรับ: \"${meta.query}\"\\nกรุณาลองระบุชื่อบริษัทลูกค้า หรือ Sold To ID ใหม่อีกครั้งครับ (เช่น ธนชาต, กฟน, ไทยประกัน, CIMB, ทอ)`;\n}\n\nreturn {\n    json: {\n        replyToken: meta.replyToken,\n        text: replyText.trim()\n    }\n};"
+      },
+      "id": "format-sold-to-response",
+      "name": "Format Sold To Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const meta = $('Parse & Route Events').item.json;\nconst userId = meta.userId;\n\nconst tagPrefix = \"@คุณ \";\nconst helpText = `${tagPrefix}📖 [คู่มือ & รวมคำสั่งลัด Captain Copilot]\n━━━━━━━━━━━━━━━━━━━━\nสวัสดีครับ! คุณสามารถพิมพ์สั่งงานผมในกลุ่มได้ทันที:\n\n1️⃣ ☀️ สรุปภารกิจประจำวัน (Standup Briefing)\n• พิมพ์: สรุปเช้า หรือ standup\n  (บอทจะสรุปสถานะเคสทั้งหมด และจัดกลุ่มงานตาม Site Engineer พร้อมลิงก์)\n\n2️⃣ 🏢 เช็คข้อมูลไซต์ / Sold To ลูกค้า\n• พิมพ์: Sold To [ลูกค้า] หรือ ข้อมูลไซต์ [ลูกค้า]\n  ตัวอย่าง: ข้อมูลไซต์ ธนชาต, ไซต์ กฟน, Sold To 0051736999\n  (แสดงรหัส Sold To, เบอร์ติดต่อ, ที่อยู่ และเคสที่กำลังดำเนินการ)\n\n3️⃣ 📊 เช็คสถานะเคส / สรุปตั๋ว Odoo\n• เช็คเคสตามชื่อ: เช็คเคส ธนชาต, สถานะ ไทยประกัน\n• เช็คเคสทั้งหมด: มีกี่เคส, มีเคสอะไรบ้าง\n• เช็คด้วยเลข SR / ตั๋ว: 1-23818343098 หรือ TKT-00057\n  (⚡ เมื่อทีมตามเคส ระบบจะช่วย AI ร่างอีเมล Follow-up ส่งเข้า Telegram พี่กัปตัน พร้อมปุ่มกดส่งเมลออกได้ทันทีใน 1 คลิก)\n\n4️⃣ 🚨 เปิดเคส / วิเคราะห์อาการส่ง Avaya TAC\n• พิมพ์: เปิดเคส [ลูกค้า] [ตู้/ระบบ] [อาการเสีย/Error]\n  ตัวอย่าง: เปิดเคส ลูกค้าไทยประกัน CM 8.1 โทรออกสายนอกไม่ได้ SIP 403 Forbidden\n  (บอทจะวิเคราะห์อาการ + ร่างหัวข้อ + Impact + ขั้นตอนตรวจสอบให้ทันที)\n\n5️⃣ 🌐 ลิงก์ดูตั๋ว & อัปเดต Site Engineer (ไม่ต้องล็อกอิน)\n• เปิดดูตั๋วและเลือกเปลี่ยน Site Engineer ผ่าน Dropdown ได้ทันที:\n  https://phongthep.lol/helpdesk/ticket/<เลขตั๋ว>\n\n6️⃣ 💡 ถามปัญหาเทคนิค Avaya & VoIP\n• พิมพ์: @Captain [คำถาม] เช่น @Captain คำสั่ง trace sip ใน CM\n━━━━━━━━━━━━━━━━━━━━\n💡 พิมพ์ \"ช่วยเหลือ\" ได้ทุกเมื่อเพื่อดูคู่มือนี้อีกครั้งครับ`;\n\nconst result = {\n    replyToken: meta.replyToken,\n    text: helpText.trim()\n};\n\nif (userId) {\n    result.mention = {\n        mentionees: [\n            {\n                index: 0,\n                length: tagPrefix.trim().length,\n                userId: userId\n            }\n        ]\n    };\n}\n\nreturn { json: result };"
+      },
+      "id": "format-help-response-01",
+      "name": "Format Help Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ Boolean($json.data && $json.data.length > 0 && $('Parse & Route Events').item.json.query !== '__STANDUP__') }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-ticket-found-alert",
+      "name": "Check If Ticket Found for Alert",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://phongthep.lol/helpdesk/api/ticket_detail/{{ $json.data[0].id }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "fetch-ticket-detail-alert",
+      "name": "Fetch Ticket Detail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1264,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  JSON.stringify({\n    model: \"openai/gpt-oss-120b\",\n    messages: [\n      {\n        role: \"system\",\n        content: \"You are an Elite Enterprise Telecom Engineer at JADS Comm Limited. Your role is to draft professional, concise, polite yet urgent English follow-up emails to Avaya Support TAC on behalf of the team. Review the ticket details and the latest email history. Provide a complete follow-up email starting with 'Subject:' and followed by the email body.\"\n      },\n      {\n        role: \"user\",\n        content: `Ticket Ref: #${$json.ticket?.ref || $json.ticket?.id}\\nCustomer: ${$json.ticket?.customer || '-'}\\nAvaya SR#: ${$json.ticket?.avaya_sr_number || '-'}\\nSubject: ${$json.ticket?.subject || '-'}\\nCurrent Status: ${$json.ticket?.state || '-'}\\nAvaya Status: ${$json.ticket?.avaya_status || '-'}\\nSite Engineer: ${$json.ticket?.site_engineer || '-'}\\n\\nRecent Email/Chatter History:\\n${($json.messages || []).slice(0, 3).map(m => `[From: ${m.author || 'Support'} | Date: ${m.date || '-'}]\\nSubject: ${m.subject || '-'}\\nMessage: ${(m.body || '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim().substring(0, 350)}`).join('\\n---\\n')}\\n\\nPlease draft an urgent, polite follow-up email to Avaya TAC requesting an update and next steps.`\n      }\n    ],\n    temperature: 0.3,\n    max_tokens: 500\n  })\n}}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "groq-draft-followup-email",
+      "name": "Groq AI: Draft Follow-up Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1456,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const groqResp = $input.item.json;\nconst draft = groqResp.choices?.[0]?.message?.content || \"Could not generate follow-up draft.\";\n\nconst meta = $('Parse & Route Events').item.json;\nconst tDetail = $('Fetch Ticket Detail').item.json.ticket || {};\nconst msgs = $('Fetch Ticket Detail').item.json.messages || [];\n\nlet lastSnippet = \"-\";\nif (msgs.length > 0) {\n    const m = msgs[0];\n    let clean = (m.body || \"\").replace(/<[^>]+>/g, \" \").replace(/\\s+/g, \" \").trim().substring(0, 250);\n    lastSnippet = `<b>${m.author || 'Support'}:</b> ${clean}`;\n}\n\nconst uid = meta.userId;\nlet requester = \"@ทีมงาน\";\nif (uid === \"U7065613de16484ec6166f78c33eb1bb6\") {\n    requester = \"@Captain (Phongthep)\";\n}\n\nconst escapeHtml = (s) => (s || \"\").toString().replace(/&/g, \"&amp;\").replace(/</g, \"&lt;\").replace(/>/g, \"&gt;\");\n\nconst telegramHtml = `🔔 <b>[แจ้งเตือนทีมตามเคส ➔ ร่างเมล Follow-up]</b>\\n\\n` +\n`👤 <b>ผู้ตามงานใน LINE:</b> ${escapeHtml(requester)}\\n` +\n`💬 <b>ข้อความ:</b> \"${escapeHtml(meta.rawText)}\"\\n` +\n`🏢 <b>ลูกค้า:</b> ${escapeHtml(tDetail.customer || '-')}\\n` +\n`🎫 <b>ตั๋ว Odoo:</b> #${escapeHtml(tDetail.ref || String(tDetail.id))} (ID: ${tDetail.id})\\n` +\n`🔢 <b>Avaya SR#:</b> ${escapeHtml(tDetail.avaya_sr_number || '-')}\\n` +\n`📊 <b>สถานะ:</b> ${escapeHtml(tDetail.state || '-')} | ${escapeHtml(tDetail.avaya_status || '-')}\\n` +\n`👨‍💻 <b>Site Engineer:</b> ${escapeHtml(tDetail.site_engineer || 'Phongthep Phimthong')}\\n\\n` +\n`📩 <b>ความคืบหน้า/เมลล่าสุด:</b>\\n` +\n`<i>${lastSnippet}</i>\\n\\n` +\n`📝 <b>AI ร่างเมล Follow-up พร้อมส่ง Avaya:</b>\\n` +\n`<pre>${escapeHtml(draft)}</pre>\\n\\n` +\n`🌐 <a href=\"${tDetail.portal_url || ('https://phongthep.lol/helpdesk/ticket/' + tDetail.id)}\">เปิดดูตั๋วใน Odoo</a>`;\n\nreturn {\n    json: {\n        chat_id: 8948351323,\n        text: telegramHtml,\n        parse_mode: \"HTML\",\n        disable_web_page_preview: true,\n        reply_markup: {\n            inline_keyboard: [\n                [\n                    {\n                        text: \"📤 ส่งเมล Follow-up นี้ทันที\",\n                        callback_data: \"send_followup:\" + tDetail.id\n                    }\n                ]\n            ]\n        }\n    }\n};"
+      },
+      "id": "format-telegram-followup",
+      "name": "Format Telegram Follow-up Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8889798857:AAF1ocHXbDogH5VnbZLaESIhQgSb9vEkzms/sendMessage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "send-telegram-followup-alert",
+      "name": "Send Telegram Alert: Follow-up",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1856,
+        384
+      ]
+    }
+  ],
+  "connections": {
+    "LINE Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse & Route Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Route Events": {
+      "main": [
+        [
+          {
+            "node": "Route Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Action": {
+      "main": [
+        [
+          {
+            "node": "Lookup Sold To API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Query Odoo Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Groq AI: Draft Avaya SR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Groq AI: Assistant Chat",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Help Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Odoo Ticket": {
+      "main": [
+        [
+          {
+            "node": "Format Status Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check If Ticket Found for Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Status Message": {
+      "main": [
+        [
+          {
+            "node": "Send LINE Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq AI: Draft Avaya SR": {
+      "main": [
+        [
+          {
+            "node": "Format Case Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Case Template": {
+      "main": [
+        [
+          {
+            "node": "Send LINE Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq AI: Assistant Chat": {
+      "main": [
+        [
+          {
+            "node": "Format AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format AI Response": {
+      "main": [
+        [
+          {
+            "node": "Send LINE Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Sold To API": {
+      "main": [
+        [
+          {
+            "node": "Format Sold To Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Sold To Response": {
+      "main": [
+        [
+          {
+            "node": "Send LINE Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Help Response": {
+      "main": [
+        [
+          {
+            "node": "Send LINE Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Ticket Found for Alert": {
+      "main": [
+        [
+          {
+            "node": "Fetch Ticket Detail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Fetch Ticket Detail": {
+      "main": [
+        [
+          {
+            "node": "Groq AI: Draft Follow-up Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq AI: Draft Follow-up Email": {
+      "main": [
+        [
+          {
+            "node": "Format Telegram Follow-up Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Telegram Follow-up Alert": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Alert: Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}

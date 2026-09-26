@@ -1,0 +1,363 @@
+{
+  "id": "oLz8vr1CQSGNRtg6",
+  "name": "Project PBX1 - Dev copy TEST",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        -192
+      ],
+      "id": "e49b59f6-0c2f-4d78-83a1-534e8a8ef364",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/odoo_storage/inbox/*.wav",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        -192
+      ],
+      "id": "a6522f36-cbd0-4a81-b42e-e9dfe270a6e5",
+      "name": "Read/Write Files from Disk",
+      "executeOnce": false,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.10.51:9000/v1/audio/transcriptions",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "base"
+            },
+            {
+              "name": "language",
+              "value": "th"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -880,
+        -224
+      ],
+      "id": "51cb7587-1023-49f5-b7d1-209fa8099bb7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "helpdesk.ticket.pro",
+        "fieldsToCreateOrUpdate": {
+          "fields": [
+            {
+              "fieldName": "subject",
+              "fieldValue": "={{ $json.subject }}"
+            },
+            {
+              "fieldName": "description",
+              "fieldValue": "={{ $json.description }}"
+            },
+            {
+              "fieldName": "ticket_type",
+              "fieldValue": "={{ $json.type }}"
+            },
+            {
+              "fieldName": "priority",
+              "fieldValue": "={{ $json.priority }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -288
+      ],
+      "id": "b6f61fbe-b43a-4f57-be9f-8f3bdd20bb81",
+      "name": "Create an item",
+      "credentials": {
+        "odooApi": {
+          "id": "DgdttEnPAIFyC8r9",
+          "name": "Odoo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=วิเคราะห์ข้อความเสียงนี้และตอบกลับเป็น JSON เท่านั้น\nโครงสร้าง JSON:\n{\n  \"create_ticket\": true,\n  \"subject\": \"สรุปชื่อเรื่องภาษาไทยสั้นๆ (ใส่ค่าว่างถ้าข้อความเป็นเสียงรบกวน/เสียงเงียบ/ปัญหาถูกแก้ไขแล้ว)\",\n  \"description\": \"รายละเอียดภาษาไทย (ใส่ค่าว่างถ้าข้อความเป็นเสียงรบกวน/เสียงเงียบ/ปัญหาถูกแก้ไขแล้ว)\",\n  \"type\": \"ประเภท: 'question', 'incident', หรือ 'service_request'\",\n  \"priority\": \"ระดับ: '0', '1', '2', หรือ '3'\",\n  \"create_ticket_decision\": \"วิเคราะห์ข้อความเสียงนี้ว่าต้องเปิดตั๋วใน Odoo หรือไม่: ตอบเป็น true เสมอหากมีการพูดคุยเกี่ยวกับประเด็นงาน หรือ ปัญหาที่ยังไม่แก้ พนักงานอาจจะตอบว่าเปิดเคจแล้ว คือ กำลังเปิดเคจนั้นๆ , ตอบเป็น false เฉพาะกรณีที่เป็นเสียงเงียบ เสียงรบกวนสั้นๆ หรือการทักทายสั้นๆ แล้ววางสายหรือ ปัญหาถูกแก้ไขแล้วในไฟล์นั้นๆ หรือ มีการแก้ไขหาแล้ว\"\n}\n(หมายเหตุ: ให้ประเมินผลลัพธ์การตัดสินใจจาก 'create_ticket_decision' แล้วนำมาใส่ในฟิลด์ 'create_ticket' ด้วยค่า true หรือ false)\n\nข้อความดิบ: {{ $json.text }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        -224
+      ],
+      "id": "8c8aef48-db51-46fc-a38d-66c4568d94e9",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "baQs45Go0bhrOSLn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        64
+      ],
+      "id": "bce26c32-0b14-48fa-a038-f1e0cb6ec3de",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.content.parts[0].text;\nconst cleanText = text.replace(/```json|```/g, '').trim();\ntry {\n    const parsed = JSON.parse(cleanText);\n    parsed.create_ticket = (parsed.create_ticket === true || parsed.create_ticket === 'true');\n    return parsed;\n} catch (e) {\n    return { \n        create_ticket: true,\n        subject: 'Parsing Error',\n        description: 'Failed to parse Gemini output: ' + text,\n        type: 'incident',\n        priority: '1'\n    };\n}"
+      },
+      "id": "d55c6114-cc78-4a20-8dc2-81249d0cd70a",
+      "name": "Parse Gemini JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=mv \"/home/node/.n8n-files/odoo_storage/inbox/{{ $node['Read/Write Files from Disk'].json.fileName }}\" \"/home/node/.n8n-files/odoo_storage/success/\""
+      },
+      "id": "61c78720-35e8-468d-86b5-ffa7719fe755",
+      "name": "Move to Success",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "command": "find /home/node/.n8n-files/odoo_storage/recording/ -name \"*.wav\" -exec mv {} /home/node/.n8n-files/odoo_storage/error/ \\;"
+      },
+      "id": "ec7688ed-8649-4b99-8ad9-03e836bfd6c4",
+      "name": "Move to Error",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "673f4e24-9b2e-4b4e-9d2a-8f1234bc5678",
+              "leftValue": "={{ $json.create_ticket }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        -32
+      ],
+      "id": "if-should-create-ticket-node",
+      "name": "Should Create Ticket?"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().slice(0, 1);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        -352
+      ],
+      "id": "e3cb2657-3b2d-45db-990a-a82fde2b46ce",
+      "name": "Limit to 1 File"
+    }
+  ],
+  "connections": {
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Limit to 1 File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Parse Gemini JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an item": {
+      "main": [
+        [
+          {
+            "node": "Move to Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Move to Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Gemini JSON": {
+      "main": [
+        [
+          {
+            "node": "Should Create Ticket?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Create Ticket?": {
+      "main": [
+        [
+          {
+            "node": "Create an item",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Move to Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit to 1 File": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  }
+}

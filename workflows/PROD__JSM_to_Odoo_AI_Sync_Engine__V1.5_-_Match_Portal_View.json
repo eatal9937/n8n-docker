@@ -1,0 +1,217 @@
+{
+  "id": "4hVHLg7L88mRUk6V",
+  "name": "PROD: JSM to Odoo AI Sync Engine (V1.5 - Match Portal View)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "node-1",
+      "name": "Schedule (5 Min)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jadssupport.atlassian.net/rest/api/3/search/jql",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"jql\": \"statusCategory != Done ORDER BY created DESC\", \"maxResults\": 50, \"fields\": [\"summary\", \"description\", \"status\", \"reporter\", \"priority\", \"created\", \"issuetype\"] }",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "node-2",
+      "name": "Fetch All Open Requests",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        0,
+        304
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "VXVWhT3RImLF55GL",
+          "name": "Jira API Token (JADS)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "issues",
+        "options": {}
+      },
+      "id": "node-3",
+      "name": "Split Issues",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        224,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function adfToText(content) { if (!content) return \"\"; if (typeof content === \"string\") return content; let text = \"\"; if (Array.isArray(content)) { content.forEach(c => text += adfToText(c) + \" \"); } else if (content.content) { text += adfToText(content.content); } else if (content.text) { text += content.text; } return text.trim(); } const items = $input.all(); return items.map(item => { const f = item.json.fields || {}; return { json: { jira_key: item.json.key || \"UNKNOWN\", summary: f.summary || \"No Summary\", status: f.status?.name || \"Open\", reporter: f.reporter?.displayName || \"Unknown\", description: adfToText(f.description) || \"No Description\" } }; });"
+      },
+      "id": "node-4",
+      "name": "Normalize JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "helpdesk.ticket",
+        "operation": "getAll",
+        "limit": 1,
+        "options": {}
+      },
+      "id": "node-5",
+      "name": "Search Odoo by Jira Key",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        672,
+        304
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "DgdttEnPAIFyC8r9",
+          "name": "Odoo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.id }}",
+              "operation": "notEqual"
+            }
+          ]
+        }
+      },
+      "id": "node-6",
+      "name": "Ticket Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        880,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "helpdesk.ticket"
+      },
+      "id": "node-8",
+      "name": "Create Odoo Ticket",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        400
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "DgdttEnPAIFyC8r9",
+          "name": "Odoo account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (5 Min)": {
+      "main": [
+        [
+          {
+            "node": "Fetch All Open Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All Open Requests": {
+      "main": [
+        [
+          {
+            "node": "Split Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Issues": {
+      "main": [
+        [
+          {
+            "node": "Normalize JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize JSON": {
+      "main": [
+        [
+          {
+            "node": "Search Odoo by Jira Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Odoo by Jira Key": {
+      "main": [
+        [
+          {
+            "node": "Ticket Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket Exists?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create Odoo Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}

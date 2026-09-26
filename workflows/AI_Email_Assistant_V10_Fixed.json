@@ -1,0 +1,233 @@
+{
+  "id": "XJUcCDHyNXCFRsep",
+  "name": "AI_Email_Assistant_V10_Fixed",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 20
+            }
+          ]
+        }
+      },
+      "id": "s1",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/bot8889798857:AAF1ocHXbDogH5VnbZLaESIhQgSb9vEkzms/getUpdates?allowed_updates=%5B%22message%22%5D",
+        "options": {}
+      },
+      "id": "h1",
+      "name": "GetUpdates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = items[0].json.result || [];\nif (r.length === 0) return [];\nreturn r.filter(x => x.message?.from.id == 8948351323).map(x => ({\n  json: {\n    update_id: x.update_id,\n    message: x.message,\n    query: x.message.text\n  }\n}));"
+      },
+      "id": "c1",
+      "name": "Filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.query}}",
+        "options": {
+          "systemMessage": "คุณคือ Elite Senior AI Assistant ส่วนตัวของคุณ Captain Phongthep\\n\\nบทบาทหลักของคุณคือจัดการอีเมลด้วยความแม่นยำสูงสุด:\\n1. เมื่อได้รับคำสั่งเกี่ยวกับอีเมล (เช่น เช็คเมล, สรุปเมล) คุณต้องใช้ 'Read_Email_Tool' เสมอ\\n2. ข้อมูลจาก Tool จะอยู่ในรูปแบบ JSON คุณต้องนำมาสรุปให้สวยงาม อ่านง่าย และเป็นมืออาชีพ\\n3. หากไม่มีเมลใหม่ หรือเกิดข้อผิดพลาด ให้แจ้งกัปตันอย่างตรงไปตรงมา\\n\\nกฎการตอบกลับ:\\n- ใช้ภาษาที่เป็นงานเป็นการแต่สุภาพ (เรียกว่า กัปตัน)\\n- ใช้ Markdown ในการจัดรูปแบบ (เช่น ตัวหนา, รายการข้อๆ)\\n- สรุปเนื้อหาสำคัญให้สั้นแต่ครบถ้วน"
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        650,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "gemini-model",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        650,
+        200
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "baQs45Go0bhrOSLn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Read_Email_Tool",
+        "description": "Call this to fetch and read the latest 5 emails from the inbox. Returns subject, sender, and content summary.",
+        "workflowId": {
+          "__rl": true,
+          "value": "RvhwduWfehY3EQnp",
+          "mode": "id"
+        }
+      },
+      "id": "email-tool",
+      "name": "Read_Email_Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        850,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8948351323",
+        "text": "={{$json.output}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-reply",
+      "name": "Telegram Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        1050,
+        0
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "qzMwsuCr7woIGqjM",
+          "name": "Telegram Bot (phongthep_alert_bot)"
+        }
+      },
+      "webhookId": "d6e2d607-56ef-4416-8147-6820a06a6c1f"
+    },
+    {
+      "parameters": {
+        "url": "={{ \"https://api.telegram.org/bot8889798857:AAF1ocHXbDogH5VnbZLaESIhQgSb9vEkzms/getUpdates?offset=\" + ($node[\"Filter\"].json.update_id + 1) }}",
+        "options": {}
+      },
+      "id": "h2",
+      "name": "ACK",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1250,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "GetUpdates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetUpdates": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Reply": {
+      "main": [
+        [
+          {
+            "node": "ACK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read_Email_Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}

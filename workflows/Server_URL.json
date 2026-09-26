@@ -1,0 +1,28 @@
+{
+  "id": "9DrAvsfm82f49rEe",
+  "name": "Server URL",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6d8b7819-9ae9-44ba-9b5b-86607add1896",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f462f8c3-c805-4685-8d5e-b61d31000fac",
+      "name": "Webhook",
+      "webhookId": "6d8b7819-9ae9-44ba-9b5b-86607add1896"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}

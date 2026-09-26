@@ -1,0 +1,265 @@
+{
+  "id": "rwWX7X2UjYFIOUNL",
+  "name": "PRODUCTION_CLI_V10_3_PROFESSIONAL",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 20
+            }
+          ]
+        }
+      },
+      "id": "s1",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/bot8825576269:AAEobphAqxQyFO1zljWl4UhB0iQuKw2G-rg/getUpdates?allowed_updates=%5B%22message%22%2C%22callback_query%22%5D",
+        "options": {}
+      },
+      "id": "h1",
+      "name": "GetUpdates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        208,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = items[0].json.result || [];\nreturn r.filter(x => x.message?.from.id == 8948351323).map(x => ({json: x}));"
+      },
+      "id": "c1",
+      "name": "Filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "คุณคือ Elite Senior Systems Engineer และ Office AI Assistant ส่วนตัวของคุณ Captain\\n\\nบทบาทของคุณ:\\n1. วิเคราะห์ระบบ macOS/Linux ผ่าน SSH_Tool: รันคำสั่ง bash ที่แม่นยำเพื่อตรวจสอบ Disk, CPU, Logs, Process และปรับแต่งระบบ\\n2. จัดการอีเมลผ่าน Read_Email_Tool: สรุปเมลสำคัญ ค้นหาข้อมูลจากเมล และแจ้งเตือนหัวข้อที่น่าสนใจ\\n\\nกฎเหล็ก:\\n- ตอบสั้น กระชับ เป็นงานเป็นการ แบบ Senior Engineer\\n- หากต้องรันคำสั่งที่อาจมีผลกระทบ (เช่น ลบไฟล์) ต้องขออนุมัติก่อนเสมอ\\n- ใช้ Markdown ในการจัดรูปแบบคำตอบให้สวยงาม (ใช้ Code block หรือตาราง)\\n- หากมีปัญหาเรื่อง Quota หรือ Error ให้แจ้งผู้ใช้อย่างสุภาพ"
+        }
+      },
+      "id": "a1",
+      "name": "AI",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        656,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "g1",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        656,
+        208
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YQG3zkfraMskWCKw",
+          "name": "Google Gemini(PaLM) Api account CLI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "SSH_Tool",
+        "description": "Run terminal commands on Mac. Input: exact command.",
+        "workflowId": {
+          "__rl": true,
+          "value": "VsVPUXrNc77lAEf6",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/VsVPUXrNc77lAEf6",
+          "cachedResultName": "FUNCTION_SSH_RUNNER"
+        }
+      },
+      "id": "t1",
+      "name": "SSH_Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "name": "Read_Email_Tool",
+        "description": "Read the latest 5 emails from the user Office account.",
+        "workflowId": {
+          "__rl": true,
+          "value": "RvhwduWfehY3EQnp",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/RvhwduWfehY3EQnp",
+          "cachedResultName": "FUNCTION_EMAIL_READER"
+        }
+      },
+      "id": "t2",
+      "name": "Read_Email_Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1008,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8948351323",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "r1",
+      "name": "Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        0
+      ],
+      "webhookId": "5af049de-ab7d-4c14-9cb7-a5a5ca607125",
+      "credentials": {
+        "telegramApi": {
+          "id": "AjbUB7OxrwyVTQri",
+          "name": "Telegram Bot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ \"https://api.telegram.org/bot8825576269:AAEobphAqxQyFO1zljWl4UhB0iQuKw2G-rg/getUpdates?allowed_updates=%5B%22message%22%2C%22callback_query%22%5D&offset=\" + ($node[\"Filter\"].json.update_id + 1) }}",
+        "options": {}
+      },
+      "id": "h2",
+      "name": "ACK",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1408,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "GetUpdates",
+            "index": 0,
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GetUpdates": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "index": 0,
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI",
+            "index": 0,
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "AI": {
+      "main": [
+        [
+          {
+            "node": "Reply",
+            "index": 0,
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Reply": {
+      "main": [
+        [
+          {
+            "node": "ACK",
+            "index": 0,
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI",
+            "index": 0,
+            "type": "ai_languageModel"
+          }
+        ]
+      ]
+    },
+    "SSH_Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI",
+            "index": 0,
+            "type": "ai_tool"
+          }
+        ]
+      ]
+    },
+    "Read_Email_Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI",
+            "index": 0,
+            "type": "ai_tool"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}

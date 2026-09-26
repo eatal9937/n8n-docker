@@ -1,0 +1,78 @@
+{
+  "id": "VsVPUXrNc77lAEf6",
+  "name": "FUNCTION_SSH_RUNNER",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "node_trigger",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "={{ ( $json.gemini_query ? 'gemini --session-id \"' + ($json.chatId || 'default') + '\" --prompt \"' + $json.gemini_query.replace(/\"/g, '\\\\\"') + '\" --output-format text' : (($json.query || $json.input || $json.action_input || \"\").match(/^top(\\\\s|$)/) ? ($json.query || $json.input || $json.action_input).replace(/^top/, 'top -b -n 1') : ($json.query || $json.input || $json.action_input)) ) + '; echo \"\\\\n\\\\n---EXECUTION_COMPLETE---\"' }}"
+      },
+      "id": "node_ssh",
+      "name": "SSH Execute",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        464,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "RRZzsOWc3Vw2nCeO",
+          "name": "SSH Password account 192.168.10.51"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  response: (items[0].json.stdout || \"\") + (items[0].json.stderr || \"\") || \"No output from SSH\"\n};"
+      },
+      "id": "clean_response",
+      "name": "Clean Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        304
+      ]
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "SSH Execute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH Execute": {
+      "main": [
+        [
+          {
+            "node": "Clean Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}

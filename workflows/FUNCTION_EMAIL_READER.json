@@ -1,0 +1,82 @@
+{
+  "id": "RvhwduWfehY3EQnp",
+  "name": "FUNCTION_EMAIL_READER",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "node_trigger",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "postProcessAction": "nothing",
+        "options": {
+          "forceReconnect": true,
+          "forceReconnectEveryMinutes": 15
+        }
+      },
+      "id": "node_imap",
+      "name": "Read Emails",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 1,
+      "position": [
+        464,
+        304
+      ],
+      "credentials": {
+        "imap": {
+          "id": "7NemRWLWSXxPwAFv",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const emailList = items.map(item => ({\n  subject: item.json.subject || \"(No Subject)\",\n  from: item.json.from?.text || item.json.from?.value?.[0]?.address || \"Unknown Sender\",\n  date: item.json.date || \"Unknown Date\",\n  text: item.json.text?.substring(0, 500) || \"(No Content)\"\n}));\nreturn { response: emailList };"
+      },
+      "id": "node_format",
+      "name": "Format List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        304
+      ]
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Emails": {
+      "main": [
+        [
+          {
+            "node": "Format List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}

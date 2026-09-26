@@ -1,0 +1,300 @@
+{
+  "id": "FZdzEUCSUvZxIYSl",
+  "name": "Project PBX",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds"
+            }
+          ]
+        }
+      },
+      "id": "6125efd1-0ed7-406f-ad7c-e0656e771d35",
+      "name": "Schedule Trigger3",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -128,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/odoo_storage/inbox/*.wav",
+        "options": {
+          "dataPropertyName": "data"
+        }
+      },
+      "id": "5caf1a23-50f0-42a8-a690-044d4c0e9777",
+      "name": "Read/Write Files from Disk3",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        656
+      ],
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false,
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.10.51:9000/v1/audio/transcriptions",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "base"
+            },
+            {
+              "name": "language",
+              "value": "th"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "c15f7a61-9513-4098-83e1-fd3773b191ba",
+      "name": "Whisper AI (192.168.10.50)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        272,
+        656
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "helpdesk.ticket.pro",
+        "fieldsToCreateOrUpdate": {
+          "fields": [
+            {
+              "fieldName": "subject",
+              "fieldValue": "={{ $node[\"Read/Write Files from Disk3\"].json.fileName }} "
+            },
+            {
+              "fieldName": "description",
+              "fieldValue": "={{ $json.text }}"
+            }
+          ]
+        }
+      },
+      "id": "44f25dfb-5377-4272-b618-b9d61d964df6",
+      "name": "Odoo Create Ticket3",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        560,
+        608
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "DgdttEnPAIFyC8r9",
+          "name": "Odoo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "754d2a11-aa97-448c-9b57-63725efa8279",
+      "name": "Every 1 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -144,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/odoo_storage/recording/*",
+        "options": {}
+      },
+      "id": "3a4773b1-2851-4888-91b4-5266691c7814",
+      "name": "Read from Recording",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.10.51:9000/v1/audio/transcriptions",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file"
+            },
+            {
+              "name": "model",
+              "value": "base"
+            },
+            {
+              "name": "language",
+              "value": "th"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9eeed9b5-dd3d-44b1-9e40-c2513f8486af",
+      "name": "Whisper AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        304,
+        352
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "command": "=mv \"/home/node/.n8n-files/odoo_storage/recording/{{ $node[\"Read from Recording\"].json.fileName }}\" \"/home/node/.n8n-files/odoo_storage/success/\""
+      },
+      "id": "8e0fb6df-724f-454f-9525-0dcdfd9f2ed9",
+      "name": "Move to Success",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        816,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=mv \"/home/node/.n8n-files/odoo_storage/recording/{{ $node[\"Read from Recording\"].json.fileName }}\" \"/home/node/.n8n-files/odoo_storage/error/\""
+      },
+      "id": "996c85c9-db15-4b3c-b4d3-c87c199b5c7e",
+      "name": "Move to Error",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        896,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "customObject"
+      },
+      "id": "bc8d4414-fde9-4d83-b6c3-6e3f310ec66e",
+      "name": "Odoo Create Ticket",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        592,
+        272
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "DgdttEnPAIFyC8r9",
+          "name": "Odoo account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger3": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk3": {
+      "main": [
+        [
+          {
+            "node": "Whisper AI (192.168.10.50)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whisper AI (192.168.10.50)1": {
+      "main": [
+        [
+          {
+            "node": "Odoo Create Ticket3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 1 min": {
+      "main": [
+        [
+          {
+            "node": "Read from Recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read from Recording": {
+      "main": [
+        [
+          {
+            "node": "Whisper AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whisper AI": {
+      "main": [
+        [
+          {
+            "node": "Odoo Create Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}
