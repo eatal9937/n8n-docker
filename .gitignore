@@ -9,3 +9,10 @@ odoo_storage/
 
 # OS specific files
 .DS_Store
+
+# Backups, junk, and logs
+*.bak*
+._*
+.Spotlight-V100
+.Trashes
+logs/

@@ -1,7 +1,11 @@
 {
+  "updatedAt": "2026-05-20T18:11:24.249Z",
+  "createdAt": "2026-05-20T17:17:06.794Z",
   "id": "RvhwduWfehY3EQnp",
   "name": "FUNCTION_EMAIL_READER",
+  "description": null,
   "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -17,10 +21,7 @@
     {
       "parameters": {
         "postProcessAction": "nothing",
-        "options": {
-          "forceReconnect": true,
-          "forceReconnectEveryMinutes": 15
-        }
+        "options": {}
       },
       "id": "node_imap",
       "name": "Read Emails",
@@ -78,5 +79,43 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Read Emails": {
+      "lastMessageUid": 3122
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "45fbfa53-5229-4004-9c99-759591e41e23",
+  "activeVersionId": "33691d81-655a-46f8-a18c-ef94bc07dd90",
+  "versionCounter": 123,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-05-20T17:17:06.801Z",
+      "createdAt": "2026-05-20T17:17:06.801Z",
+      "role": "workflow:owner",
+      "workflowId": "RvhwduWfehY3EQnp",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
   }
 }

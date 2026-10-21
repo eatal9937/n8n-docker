@@ -1,7 +1,11 @@
 {
+  "updatedAt": "2026-05-20T15:03:33.358Z",
+  "createdAt": "2026-05-20T08:04:09.241Z",
   "id": "VsVPUXrNc77lAEf6",
   "name": "FUNCTION_SSH_RUNNER",
+  "description": null,
   "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -74,5 +78,50 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "query": "sysctl -n machdep.cpu.brand_string"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "83e7f802-e52b-41bb-8854-f60483d0052c",
+  "activeVersionId": "83e7f802-e52b-41bb-8854-f60483d0052c",
+  "versionCounter": 87,
+  "triggerCount": 0,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-05-20T08:04:09.247Z",
+      "createdAt": "2026-05-20T08:04:09.247Z",
+      "role": "workflow:owner",
+      "workflowId": "VsVPUXrNc77lAEf6",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
   }
 }

@@ -1,7 +1,11 @@
 {
+  "updatedAt": "2026-05-25T04:27:26.592Z",
+  "createdAt": "2026-05-25T04:04:43.970Z",
   "id": "XJUcCDHyNXCFRsep",
   "name": "AI_Email_Assistant_V10_Fixed",
+  "description": null,
   "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -229,5 +233,48 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Schedule": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "223b71b7-77ea-4785-ac76-8e6ee9c5d8d2",
+  "activeVersionId": "223b71b7-77ea-4785-ac76-8e6ee9c5d8d2",
+  "versionCounter": 38,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-05-25T04:04:43.976Z",
+      "createdAt": "2026-05-25T04:04:43.976Z",
+      "role": "workflow:owner",
+      "workflowId": "XJUcCDHyNXCFRsep",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
   }
 }

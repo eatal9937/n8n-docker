@@ -1,0 +1,112 @@
+{
+  "updatedAt": "2026-08-23T12:20:56.484Z",
+  "createdAt": "2026-04-22T05:13:10.880Z",
+  "id": "IctGflu4JlbPLCIC",
+  "name": "Email Trigger (IMAP)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        144
+      ],
+      "id": "30d74feb-0322-4640-ad1d-f0d2d6c81105",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "7NemRWLWSXxPwAFv",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8981592739:AAE6mwuOzK7bqRrOJnLMF41k6e7JGVzYB8A/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  chat_id: 8948351323,\n  text: `📩 <b>มีอีเมลใหม่ของบริษัทเข้ามาครับกัปตัน!</b>\\n\\n📌 <b>เรื่อง:</b> ${($json.subject || \"ไม่มีหัวข้อ\").replace(/</g, \"&lt;\").replace(/>/g, \"&gt;\")}\\n👤 <b>จาก:</b> ${($json.from || \"ไม่ระบุผู้ส่ง\").replace(/</g, \"&lt;\").replace(/>/g, \"&gt;\")}\\n\\n📄 <b>เนื้อหาโดยย่อ:</b>\\n${(($json.textPlain || $json.textHtml || \"ไม่มีเนื้อหาข้อความ\").substring(0, 350)).replace(/</g, \"&lt;\").replace(/>/g, \"&gt;\")}...`,\n  parse_mode: \"HTML\",\n  disable_web_page_preview: true\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        100,
+        144
+      ],
+      "id": "telegram-mail-node",
+      "name": "Telegram Notification"
+    }
+  ],
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Telegram Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Email Trigger (IMAP)1 Avaya Emails": {
+      "lastMessageUid": 683
+    },
+    "node:Email Trigger (IMAP)2 Choopol mail": {},
+    "node:Email Trigger (IMAP)1 Help Center": {
+      "lastMessageUid": 2136
+    },
+    "node:Email Trigger (IMAP)": {
+      "lastMessageUid": 3122
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "5af4e0e3-5328-4580-8654-21410fd1a430",
+  "activeVersionId": "433ecfb0-4a2b-40a9-b907-1800352ccf33",
+  "versionCounter": 429,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-22T05:13:10.888Z",
+      "createdAt": "2026-04-22T05:13:10.888Z",
+      "role": "workflow:owner",
+      "workflowId": "IctGflu4JlbPLCIC",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

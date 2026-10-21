@@ -1,7 +1,11 @@
 {
+  "updatedAt": "2026-08-18T03:16:43.000Z",
+  "createdAt": "2026-06-05T03:36:54.891Z",
   "id": "58vVo36uOJNVaLlT",
   "name": "AADS Recovery Alert",
+  "description": null,
   "active": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -58,5 +62,39 @@
       ]
     }
   },
-  "settings": {}
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "7b3d1132-12e7-4890-af3d-2ca239635fcb",
+  "activeVersionId": null,
+  "versionCounter": 6,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-06-05T03:36:54.954Z",
+      "createdAt": "2026-06-05T03:36:54.954Z",
+      "role": "workflow:owner",
+      "workflowId": "58vVo36uOJNVaLlT",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
 }

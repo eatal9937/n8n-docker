@@ -1,7 +1,11 @@
 {
+  "updatedAt": "2026-08-18T03:16:23.000Z",
+  "createdAt": "2026-05-12T12:19:40.851Z",
   "id": "BpT130LmBWaPcnm1",
   "name": "Project PBX copy Mok",
+  "description": null,
   "active": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -291,5 +295,41 @@
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "7557387b-a21e-4164-b96f-f10188017222",
+  "activeVersionId": null,
+  "versionCounter": 27,
+  "triggerCount": 0,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-05-12T12:19:40.855Z",
+      "createdAt": "2026-05-12T12:19:40.855Z",
+      "role": "workflow:owner",
+      "workflowId": "BpT130LmBWaPcnm1",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
   }
 }

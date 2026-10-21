@@ -1,7 +1,11 @@
 {
+  "updatedAt": "2026-05-20T09:13:37.000Z",
+  "createdAt": "2026-04-26T05:06:00.818Z",
   "id": "FZdzEUCSUvZxIYSl",
   "name": "Project PBX",
+  "description": null,
   "active": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -296,5 +300,41 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "03bef066-e5ef-433f-ba5f-b27c6b36b3be",
+  "activeVersionId": null,
+  "versionCounter": 205,
+  "triggerCount": 0,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-26T05:06:00.833Z",
+      "createdAt": "2026-04-26T05:06:00.833Z",
+      "role": "workflow:owner",
+      "workflowId": "FZdzEUCSUvZxIYSl",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
   }
 }

@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-09-28T06:13:36.466Z",
+  "createdAt": "2026-09-09T10:52:10.705Z",
+  "id": "avayaSupportSync01",
   "name": "Avaya Support to Odoo Auto-Ticket Engine",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -222,7 +228,7 @@
         "url": "https://api.telegram.org/bot8761131136:AAHyWSwn1McAArISZiFLcJauntnR7vm5Fo8/sendMessage",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  chat_id: 8948351323,\n  text: \"\\ud83d\\udd14 <b>[Avaya Support \\u2794 Odoo] \\u0e2a\\u0e23\\u0e49\\u0e32\\u0e07\\u0e15\\u0e31\\u0e4b\\u0e27\\u0e43\\u0e2b\\u0e21\\u0e48\\u0e2d\\u0e31\\u0e15\\u0e42\\u0e19\\u0e21\\u0e31\\u0e15\\u0e34!</b>\\n\\n\\ud83c\\udff7 <b>\\u0e40\\u0e25\\u0e02\\u0e17\\u0e35\\u0e48\\u0e15\\u0e31\\u0e4b\\u0e27 Odoo:</b> #{{ $json.id }}\\n\\ud83d\\udccc <b>\\u0e2b\\u0e31\\u0e27\\u0e02\\u0e49\\u0e2d:</b> {{ $('Parse Avaya Notification').item.json.subject }}{{ $('Parse Avaya Notification').item.json.avaya_customer_name ? ('\\\\n\\ud83c\\udfe2 <b>\\u0e25\\u0e39\\u0e01\\u0e04\\u0e49\\u0e32:</b> ' + $('Parse Avaya Notification').item.json.avaya_customer_name) : '' }}\\n\\ud83d\\udd27 <b>\\u0e23\\u0e30\\u0e1a\\u0e1a:</b> {{ $('Parse Avaya Notification').item.json.avaya_product }}\\n\\ud83d\\udd25 <b>Avaya SR#:</b> {{ $('Parse Avaya Notification').item.json.avaya_sr_number }}\\n\\ud83d\\udcc8 <b>\\u0e2a\\u0e16\\u0e32\\u0e19\\u0e30:</b> {{ $('Parse Avaya Notification').item.json.avaya_status || 'Created' }}\\n\\u26a0\\ufe0f <b>\\u0e04\\u0e27\\u0e32\\u0e21\\u0e40\\u0e23\\u0e48\\u0e07\\u0e14\\u0e48\\u0e27\\u0e19:</b> {{ $('Parse Avaya Notification').item.json.avaya_severity ? $('Parse Avaya Notification').item.json.avaya_severity.toUpperCase() : 'P1' }}\\n\\ud83d\\udc64 <b>\\u0e1c\\u0e39\\u0e49\\u0e15\\u0e34\\u0e14\\u0e15\\u0e48\\u0e2d:</b> {{ $('Parse Avaya Notification').item.json.avaya_contact_name }} ({{ $('Parse Avaya Notification').item.json.avaya_contact_phone }})\\n\\ud83d\\udcc5 <b>\\u0e40\\u0e27\\u0e25\\u0e32\\u0e41\\u0e08\\u0e49\\u0e07:</b> {{ $('Parse Avaya Notification').item.json.avaya_date_reported || '-' }}\\n\\n\\ud83c\\udf10 <a href=\\\"https://phongthep.ddns.net/web#id={{ $json.id }}&amp;model=helpdesk.ticket.pro&amp;view_type=form\\\">\\u0e40\\u0e1b\\u0e34\\u0e14\\u0e14\\u0e39\\u0e15\\u0e31\\u0e4b\\u0e27\\u0e43\\u0e19 Odoo</a>\\n\\ud83c\\udf10 <a href=\\\"{{ $('Parse Avaya Notification').item.json.avaya_portal_url }}\\\">\\u0e40\\u0e1b\\u0e34\\u0e14\\u0e14\\u0e39\\u0e40\\u0e04\\u0e2a\\u0e1a\\u0e19 Avaya TAC Portal</a>\",\n  parse_mode: \"HTML\",\n  disable_web_page_preview: true\n}) }}",
+        "jsonBody": "={{\n  (() => {\n    const parse = $('Parse Avaya Notification').first().json || {};\n    const esc = (s) => (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n    const cust = parse.avaya_customer_name ? `\\n🏢 <b>ลูกค้า:</b> ${esc(parse.avaya_customer_name)}` : '';\n    const sev = parse.avaya_severity ? parse.avaya_severity.toUpperCase() : 'P1';\n\n    const msg = `🔔 <b>[Avaya Support ➔ Odoo] สร้างตั๋วใหม่อัตโนมัติ!</b>\\n\\n🏷 <b>เลขที่ตั๋ว Odoo:</b> #${$json.id}\\n📌 <b>หัวข้อ:</b> ${esc(parse.subject)}${cust}\\n🔧 <b>ระบบ:</b> ${esc(parse.avaya_product || '-')}\\n🔥 <b>Avaya SR#:</b> ${esc(parse.avaya_sr_number || '-')}\\n📈 <b>สถานะ:</b> ${esc(parse.avaya_status || 'Created')}\\n⚠️ <b>ความเร่งด่วน:</b> ${sev}\\n👤 <b>ผู้ติดต่อ:</b> ${esc(parse.avaya_contact_name || '-')} (${esc(parse.avaya_contact_phone || '-')})\\n📅 <b>เวลาแจ้ง:</b> ${esc(parse.avaya_date_reported || '-')}\\n\\n🌐 <a href=\"https://phongthep.ddns.net/web#id=${$json.id}&amp;model=helpdesk.ticket.pro&amp;view_type=form\">เปิดดูตั๋วใน Odoo</a>\\n🌐 <a href=\"${parse.avaya_portal_url || 'https://support.avaya.com/'}\">เปิดดูเคสบน Avaya TAC Portal</a>`;\n\n    return JSON.stringify({\n      chat_id: 8948351323,\n      text: msg,\n      parse_mode: 'HTML',\n      disable_web_page_preview: true\n    });\n  })()\n}}",
         "options": {}
       },
       "id": "e4444444-4444-4444-4444-444444444444",
@@ -240,7 +246,7 @@
         "url": "https://phongthep.ddns.net/helpdesk/api/update_ticket",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  id: $json.id,\n  avaya_sr_number: $('Parse Avaya Notification').item.json.avaya_sr_number,\n  avaya_status: $('Parse Avaya Notification').item.json.avaya_status,\n  avaya_severity: $('Parse Avaya Notification').item.json.avaya_severity,\n  sender_name: $('Parse Avaya Notification').item.json.avaya_contact_name,\n  sender_email: $('Parse Avaya Notification').item.json.avaya_contact_email,\n  recipient: $('Parse Avaya Notification').item.json.recipient,\n  is_outbound: $('Parse Avaya Notification').item.json.is_outbound,\n  subject: $('Parse Avaya Notification').item.json.subject,\n  reply_body: $('Parse Avaya Notification').item.json.clean_reply || $('Parse Avaya Notification').item.json.raw_body,\n  description: $('Parse Avaya Notification').item.json.description\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  id: $json.id,\n  avaya_sr_number: $('Parse Avaya Notification').item.json.avaya_sr_number,\n  sold_to_id: $('Parse Avaya Notification').item.json.sold_to_id,\n  avaya_customer_name: $('Parse Avaya Notification').item.json.avaya_customer_name,\n  avaya_status: $('Parse Avaya Notification').item.json.avaya_status,\n  avaya_severity: $('Parse Avaya Notification').item.json.avaya_severity,\n  sender_name: $('Parse Avaya Notification').item.json.avaya_contact_name,\n  sender_email: $('Parse Avaya Notification').item.json.avaya_contact_email,\n  recipient: $('Parse Avaya Notification').item.json.recipient,\n  is_outbound: $('Parse Avaya Notification').item.json.is_outbound,\n  subject: $('Parse Avaya Notification').item.json.subject,\n  reply_body: $('Parse Avaya Notification').item.json.clean_reply || $('Parse Avaya Notification').item.json.raw_body,\n  description: $('Parse Avaya Notification').item.json.description\n}) }}",
         "options": {}
       },
       "id": "c3333333-3333-3333-3333-333333333333",
@@ -258,7 +264,7 @@
         "url": "https://api.telegram.org/bot8761131136:AAHyWSwn1McAArISZiFLcJauntnR7vm5Fo8/sendMessage",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  chat_id: 8948351323,\n  text: \"\\ud83d\\udcac <b>[{{ $('Parse Avaya Notification').item.json.is_outbound ? '\\ud83d\\udce4 \\u0e40\\u0e23\\u0e32\\u0e15\\u0e2d\\u0e1a\\u0e01\\u0e25\\u0e31\\u0e1a Avaya (Sent)' : '\\ud83d\\udce9 Avaya \\u0e15\\u0e2d\\u0e1a\\u0e01\\u0e25\\u0e31\\u0e1a (Inbox)' }}]</b>\\n\\n\\ud83c\\udff7 <b>\\u0e40\\u0e25\\u0e02\\u0e17\\u0e35\\u0e48\\u0e15\\u0e31\\u0e4b\\u0e27 Odoo:</b> #{{ $('Check If Ticket Exists').item.json.ref }} (ID: {{ $('Check If Ticket Exists').item.json.id }})\\n\\ud83d\\udd25 <b>Avaya SR#:</b> {{ $('Parse Avaya Notification').item.json.avaya_sr_number }}\\n\\ud83d\\udccc <b>\\u0e2b\\u0e31\\u0e27\\u0e02\\u0e49\\u0e2d:</b> {{ $('Parse Avaya Notification').item.json.subject }}\\n\\ud83d\\udc64 <b>{{ $('Parse Avaya Notification').item.json.is_outbound ? '\\u0e1c\\u0e39\\u0e49\\u0e2a\\u0e48\\u0e07 (\\u0e40\\u0e23\\u0e32):' : '\\u0e1c\\u0e39\\u0e49\\u0e2a\\u0e48\\u0e07 (Avaya):' }}</b> {{ $('Parse Avaya Notification').item.json.avaya_contact_name }} ({{ $('Parse Avaya Notification').item.json.avaya_contact_email }})\\n\\n\\u2709\\ufe0f <b>\\u0e02\\u0e49\\u0e2d\\u0e04\\u0e27\\u0e32\\u0e21:</b>\\n<i>{{ $('Parse Avaya Notification').item.json.clean_reply ? $('Parse Avaya Notification').item.json.clean_reply.substring(0, 350) : '-' }}</i>\\n\\n\\ud83c\\udf10 <a href=\\\"{{ $('Check If Ticket Exists').item.json.portal_url }}\\\">\\u0e40\\u0e1b\\u0e34\\u0e14\\u0e14\\u0e39\\u0e15\\u0e31\\u0e4b\\u0e27\\u0e43\\u0e19 Odoo</a>\\n\\ud83c\\udf10 <a href=\\\"{{ $('Parse Avaya Notification').item.json.avaya_portal_url }}\\\">\\u0e40\\u0e1b\\u0e34\\u0e14\\u0e14\\u0e39\\u0e40\\u0e04\\u0e2a\\u0e1a\\u0e19 Avaya TAC Portal</a>\",\n  parse_mode: \"HTML\",\n  disable_web_page_preview: true\n}) }}",
+        "jsonBody": "={{\n  (() => {\n    const parse = $('Parse Avaya Notification').first().json || {};\n    const chk = $('Check If Ticket Exists').first().json || {};\n    const esc = (s) => (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n    const isOut = Boolean(parse.is_outbound);\n    const direction = isOut ? '📤 เราตอบกลับ Avaya (Sent)' : '📥 Avaya ตอบกลับ (Inbox)';\n    const senderRole = isOut ? 'ผู้ส่ง (เรา):' : 'ผู้ส่ง (Avaya):';\n    const sender = `${esc(parse.avaya_contact_name || 'N/A')} (${esc(parse.avaya_contact_email || '-')})`;\n    const rawReply = parse.clean_reply || parse.raw_body || '-';\n    const replySnippet = esc(rawReply.substring(0, 350));\n    const subject = esc(parse.subject || '-');\n    const sr = esc(parse.avaya_sr_number || '-');\n    const odooRef = chk.ref || chk.id || '-';\n    const odooUrl = chk.portal_url || `https://phongthep.ddns.net/helpdesk/ticket/${chk.id}`;\n    const avayaUrl = parse.avaya_portal_url || 'https://support.avaya.com/';\n\n    const msg = `💬 <b>[${direction}]</b>\\n\\n🏷 <b>เลขที่ตั๋ว Odoo:</b> #${odooRef} (ID: ${chk.id})\\n🔥 <b>Avaya SR#:</b> ${sr}\\n📌 <b>หัวข้อ:</b> ${subject}\\n👤 <b>${senderRole}</b> ${sender}\\n\\n✉️ <b>ข้อความ:</b>\\n<i>${replySnippet}</i>\\n\\n🌐 <a href=\"${odooUrl}\">เปิดดูตั๋วใน Odoo</a>\\n🌐 <a href=\"${avayaUrl}\">เปิดดูเคสบน Avaya TAC Portal</a>`;\n\n    return JSON.stringify({\n      chat_id: 8948351323,\n      text: msg,\n      parse_mode: 'HTML',\n      disable_web_page_preview: true\n    });\n  })()\n}}",
         "options": {}
       },
       "id": "c4444444-4444-4444-4444-444444444444",
@@ -368,5 +374,40 @@
       ]
     }
   },
-  "settings": {}
+  "settings": null,
+  "staticData": {
+    "node:Email Trigger: Avaya Inbox": {
+      "lastMessageUid": 3122
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "e39f1ba8-46a5-48d0-8162-fa2ea12f7a79",
+  "activeVersionId": "c3e87e78-e085-48dc-bf13-762c544c6d9b",
+  "versionCounter": 15,
+  "triggerCount": 2,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-09-07T15:11:31.159Z",
+      "createdAt": "2026-09-07T15:11:31.159Z",
+      "role": "workflow:owner",
+      "workflowId": "avayaSupportSync01",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": null
 }

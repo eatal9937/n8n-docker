@@ -1,7 +1,11 @@
 {
+  "updatedAt": "2026-09-26T04:35:28.776Z",
+  "createdAt": "2026-09-25T20:08:57.073Z",
   "id": "SZzIphpNILR0ap6N",
   "name": "LINE_Captain_Copilot_Engine",
+  "description": null,
   "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -701,5 +705,39 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "f5e57459-366c-41f9-96ba-d11e6f711555",
+  "activeVersionId": "6630f1e4-8bd1-4379-9288-ca983ba58365",
+  "versionCounter": 25,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-09-25T20:08:57.087Z",
+      "createdAt": "2026-09-25T20:08:57.087Z",
+      "role": "workflow:owner",
+      "workflowId": "SZzIphpNILR0ap6N",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
   }
 }

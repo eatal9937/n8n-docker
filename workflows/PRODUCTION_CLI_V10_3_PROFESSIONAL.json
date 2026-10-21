@@ -1,7 +1,11 @@
 {
+  "updatedAt": "2026-05-22T05:10:20.813Z",
+  "createdAt": "2026-05-20T06:55:57.633Z",
   "id": "rwWX7X2UjYFIOUNL",
   "name": "PRODUCTION_CLI_V10_3_PROFESSIONAL",
+  "description": null,
   "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -261,5 +265,74 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Schedule": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "global": {
+      "lastUpdateId": 541982359
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {
+    "Schedule": [
+      {
+        "json": {
+          "timestamp": "2026-05-20T05:49:30.007-04:00",
+          "Readable date": "May 20th 2026, 5:49:30 am",
+          "Readable time": "5:49:30 am",
+          "Day of week": "Wednesday",
+          "Year": "2026",
+          "Month": "May",
+          "Day of month": "20",
+          "Hour": "05",
+          "Minute": "49",
+          "Second": "30",
+          "Timezone": "America/New_York (UTC-04:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "17ca1a7a-ec99-44aa-872b-b9fd53dc6719",
+  "activeVersionId": "17ca1a7a-ec99-44aa-872b-b9fd53dc6719",
+  "versionCounter": 258,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-05-20T06:55:57.638Z",
+      "createdAt": "2026-05-20T06:55:57.638Z",
+      "role": "workflow:owner",
+      "workflowId": "rwWX7X2UjYFIOUNL",
+      "projectId": "UMM0I4tuyi1cTXOj",
+      "project": {
+        "updatedAt": "2026-04-22T05:08:56.859Z",
+        "createdAt": "2026-04-22T05:05:02.165Z",
+        "id": "UMM0I4tuyi1cTXOj",
+        "name": "Phongthep Phimthong <eatal9937@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "e708acb1-9ea4-43be-a7ac-b367590b60d3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "Version 17ca1a7a",
+    "description": ""
   }
 }
