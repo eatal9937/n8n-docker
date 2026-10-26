@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-05-28T15:45:38.450Z",
+  "updatedAt": "2026-10-26T03:28:20.000Z",
   "createdAt": "2026-05-28T15:13:21.134Z",
   "id": "4hVHLg7L88mRUk6V",
   "name": "PROD: JSM to Odoo AI Sync Engine (V1.5 - Match Portal View)",
   "description": null,
   "active": false,
-  "isArchived": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -222,7 +222,7 @@
   "meta": null,
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "217cfcdb-9390-443f-8944-8be2650e37ef",
+  "versionId": "8e484244-331f-46a5-a31a-270a309ca600",
   "activeVersionId": null,
   "versionCounter": 16,
   "triggerCount": 0,

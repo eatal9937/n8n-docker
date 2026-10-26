@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-07-24T16:30:26.469Z",
+  "updatedAt": "2026-10-26T03:28:28.000Z",
   "createdAt": "2026-07-24T06:58:07.479Z",
   "id": "oLz8vr1CQSGNRtg6",
   "name": "Project PBX1 - Dev copy TEST",
   "description": null,
   "active": false,
-  "isArchived": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -372,7 +372,7 @@
   "meta": null,
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "b5e8ff7c-488c-4ac6-b503-74880b419343",
+  "versionId": "54a03054-5b1c-47d4-b898-453008493904",
   "activeVersionId": null,
   "versionCounter": 65,
   "triggerCount": 1,

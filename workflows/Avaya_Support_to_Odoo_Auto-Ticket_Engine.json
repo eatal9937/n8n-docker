@@ -377,7 +377,7 @@
   "settings": null,
   "staticData": {
     "node:Email Trigger: Avaya Inbox": {
-      "lastMessageUid": 3122
+      "lastMessageUid": 3134
     }
   },
   "meta": null,
@@ -385,7 +385,7 @@
   "pinData": null,
   "versionId": "e39f1ba8-46a5-48d0-8162-fa2ea12f7a79",
   "activeVersionId": "c3e87e78-e085-48dc-bf13-762c544c6d9b",
-  "versionCounter": 15,
+  "versionCounter": 17,
   "triggerCount": 2,
   "sourceWorkflowId": null,
   "tags": [],
